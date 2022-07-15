@@ -43,7 +43,7 @@ resource "aws_iam_role" "github" {
                 "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
               },
               "ForAnyValues:StringLike": { 
-                "token.actions.githubusercontent.com:sub": ${local.trust_repos}
+                "token.actions.githubusercontent.com:sub": ${local.trusted_repos}
               }
             }
         }
