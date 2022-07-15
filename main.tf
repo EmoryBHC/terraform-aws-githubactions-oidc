@@ -16,6 +16,15 @@ resource "aws_iam_openid_connect_provider" "github" {
   ]
 }
 
+//Lookup the current account 
+data "aws_caller_identity" "current" {}
+
+locals {
+  //Convert list of trusted repos and org into json friendly string format.
+  trusted_repos = jsonencode(var.trusted_repos)
+}
+
+//Create the trust policy that allows 
 resource "aws_iam_role" "github" {
   name = "GitHubActionsRole"
 
@@ -26,14 +35,16 @@ resource "aws_iam_role" "github" {
         {
             "Effect": "Allow",
             "Principal": {
-                "Federated": "arn:aws:iam::801835640568:oidc-provider/token.actions.githubusercontent.com"
+                "Federated": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
             },
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
-                "StringLike": {
-                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-                    ${var.allowed_orgs_and_repo}
-                }
+              "StringEquals" : {
+                "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+              },
+              "ForAnyValues:StringLike": { 
+                "token.actions.githubusercontent.com:sub": ${local.trust_repos}
+              }
             }
         }
     ]

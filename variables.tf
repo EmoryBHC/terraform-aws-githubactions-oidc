@@ -3,8 +3,7 @@ variable "policy_arn" {
     type = string
 }
 
-variable "allowed_orgs_and_repos" {
+variable "trusted_repos" {
     description = "value"
     type = list
-
 }
